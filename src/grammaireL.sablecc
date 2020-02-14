@@ -1,19 +1,100 @@
 Package sc;
 
-Helpers
+Helpers/*-----------------------------------------------------------*/
 
 lettre = [['a' .. 'z'] + ['A' .. 'Z']];
+nb = ['0' .. '9']+;
 
-Tokens
+Tokens/*-----------------------------------------------------------*/
 
 espaces = (' ' | 13 | 10)+;
 commentaire= '#' [[0 .. 0xffff] - [10 + 13]]* (10 | 13 | 10 13);
+nombre = nb;
+entier = 'entier';
 
-Ignored Tokens
+plus = '+';
+moins = '-';
+mult = '*';
+div = '/';
+inf = '<';
+sup = '>';
+egal = '=';
+ou = '|';
+et = '&';
+non = '!';
+po = '(';
+pf = ')';
+si = 'si';
+alors = 'alors';
+sinon  = 'sinon';
+tq = 'tantque';
+fr = 'faire';
+ret = 'return';
+virg =',';
+pvirg =';';
+crocho = '[';
+crochf = ']';
+acco = '{';
+accf = '}';
+ecrire = 'ecrire';
+lire = 'lire';
+id = lettre (lettre | nb)*;
+
+Ignored Tokens/*-------------------------------------------------------*/
 
 espaces, commentaire;
 
-Productions
+Productions/*-----------------------------------------------------------*/
 
-programme = optdecvar listedecfonc ;
+p = ldvo ldf;
+
+ldvo = {ldv1} ldv pvirg | {ldv2} ;
+
+ldv = {ldv1} dv ldvb |{ldv2} ;
+ldvb = {ldvb1} virg dv ldvb |{ldvb2}  ;
+
+ldf = {ldf1} df ldf |{ldf2} ;
+
+df = id po ldv pf ldvo ibloc;
+
+ibloc = {ibloc1} acco li accf ;
+
+li = {li1} i li |{li2} ;
+//lib = {lib1} virg i lib |{lib2} ;
+
+/*instruction = affectation ou if.. si ou tant que ou
+                 appel de fonction ou bloc instruction ou return*/
+/*
+i = {i1} iaff | {i2} isi | {i3} itq | {i4} iapp | {i5} ibloc | {i6} iret ;
+*/
+i = {i1} iaff pvirg | {i2} isi | {i3} itq | {i4} iapp pvirg | {i5} ibloc | {i6} iret pvirg| {ecrire} iecr pvirg;
+
+iaff = var egal e;
+isi = {si} si e alors ibloc | {sinon} si e alors [ibloc1]: ibloc sinon [ibloc2]: ibloc;
+itq =  tq e fr ibloc;
+iapp = app ;
+iret = ret e ;
+
+iecr = ecrire po e pf;
+/*
+ilir = lire po pf;
+*/
+
+/*declarationde de variable: entier x ou  entier[5]*/
+dv = {dv1} entier id | {dv2} entier id crocho nombre crochf;
+
+var = {var1} id | {var2} id crocho e crochf;
+
+e = {e1} e ou e1 | {e2} e1;
+e1 = {e11} e1 et e2 | {e12} e2;
+e2 = {e21} e2 egal e3 | {e22} e2 inf e3 | {e23} e3;
+e3 = {e31} e3 plus  e4 | {e32} e3 moins  e4 | {e33} e4;
+e4 = {e41} e4 mult  e5 | {e42} e4 div  e5 | {e43} e5;
+e5 = {e51} non e5 | {e52} e6;
+e6 = {e61} po e pf | {e62} nombre | {e63} app | {e64} var | {e65} lire po pf ;
+
+app = id po le pf;
+
+le =  {le1} e leb |{le2} ;
+leb = {leb1} virg e leb |{leb2} ;
 
