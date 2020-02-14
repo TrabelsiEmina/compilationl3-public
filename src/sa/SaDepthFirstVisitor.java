@@ -1,7 +1,7 @@
 package sa;
 
 
-// P -> LDEC LDEC 
+// P -> LDEC LDEC
 
 // DEC -> var id taille 
 // DEC -> fct id LDEC LDEC LINST 
