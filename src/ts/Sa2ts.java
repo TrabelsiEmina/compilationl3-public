@@ -23,21 +23,21 @@ public class Sa2ts extends SaDepthFirstVisitor <Void>{
     {
 
         defaultIn(node);
-       if(context == Context.GLOBAL) {
-           if (tableGlobale.getVar(node.getNom()) == null) {
-               tableGlobale.addVar(node.getNom());
-           }
-           else {
-               System.err.println("attention il existe déjà une variable globale qui a pour nom " + node.getNom());
-               System.exit(1);
-           }
-       }
+        if(context == Context.GLOBAL) {
+            if (tableGlobale.getVar(node.getNom()) == null) {
+                tableGlobale.addVar(node.getNom());
+            }
+            else {
+                System.err.println("attention il existe déjà une variable globale qui a pour nom " + node.getNom());
+                System.exit(1);
+            }
+        }
         else{
             if(tableLocaleCourante.getVar(node.getNom()) != null) {
                 System.err.println("attention il existe déjà une variable ou un parametre qui a pour nom " + node.getNom());
                 System.exit(1);
             }
-            if(context = Context.PARAM) {
+            if(context == Context.PARAM) {
                 tableLocaleCourante.addParam(node.getNom());
             }
             else {
@@ -45,26 +45,27 @@ public class Sa2ts extends SaDepthFirstVisitor <Void>{
             }
         }
 
-
         defaultOut(node);
         return null;
     }
     // DEC -> var id taille
     public void visit(SaDecTab node){
         defaultIn(node);
-       /* if(tableGlobale.getTableLocale(node.getNom()) == null){
-            tableLocaleCourante = new Ts();
-            tableGlobale.
+        if(tableGlobale.getVar(node.getNom())== null){
+            tableGlobale.addVar(node.getNom(), node.getTaille());
         }
         else {
-            System.error.println("attention la fonction " + node.getNom() + "est déjà définie");
+            System.error.println("attention le tableau " + node.getNom() + "est déjà définie");
             System.exit(1);
+        }
 
-        }*/
+        context = Context.PARAM;
+        if(node.getTaille() != null) node.getTaille().accept(this);
+
         defaultOut(node);
-        return null;
+        //return null;
     }
-    // DEC -> fct id LDEC LDEC LINST
+    // DEC -> tableau id taille
     public void visit(SaDecFonc node)
     {
         defaultIn(node);
@@ -74,7 +75,7 @@ public class Sa2ts extends SaDepthFirstVisitor <Void>{
             tableGlobale.addFct(node.getNom(), nbParam, tableLocaleCourante, node);
         }
         else {
-            System.error.println("attention la fonction " + node.getNom() + "est déjà définie");
+            System.out.println("attention la fonction " + node.getNom() + "est déjà définie");
             System.exit(1);
 
         }
@@ -86,28 +87,54 @@ public class Sa2ts extends SaDepthFirstVisitor <Void>{
         node.getCorps().accept(this);
         context = Context.GLOBAL;
         defaultOut(node);
-        return null;
+        //return null;
     }
+
+    // VAR -> var id
     public void visit(SaVarSimple node)
     {
         defaultIn(node);
+        if(tableGlobale.getVar(node.getNom()) == null){
+            tableLocaleCourante = new Ts();
+            tableLocaleCourante.addVar(node.getNom());
+        }
+        else {
+            System.out.println("attention la variable simple " + node.getNom() + "est déjà définie");
+            System.exit(1);
+
+        }
+
         defaultOut(node);
-        return null;
+        //return null;
     }
+
+    // VAR -> Indice
     public void visit(SaVarIndicee node)
     {
         defaultIn(node);
-        node.getIndice().accept(this);
+        if(tableGlobale.getVar(node.getNom()) == null){
+            tableLocaleCourante = new Ts();
+            tableLocaleCourante.addVar(node.getNom());
+        }
+        else {
+            System.out.println("attention l'indice de variable " + node.getNom() + "est déjà définie");
+            System.exit(1);
+
+        }
+
+        if(node.getIndice() != null) node.getIndice().accept(this);
+
         defaultOut(node);
-        return null;
+        //return null;
     }
 
     public void visit(SaAppel node)
     {
         defaultIn(node);
+
         if(node.getArguments() != null) node.getArguments().accept(this);
         defaultOut(node);
-        return null;
+        //return null;
     }
 
 
