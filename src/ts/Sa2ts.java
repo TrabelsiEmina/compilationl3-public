@@ -9,23 +9,26 @@ public class Sa2ts extends SaDepthFirstVisitor <Void>{
     enum Context {LOCAL, PARAM, GLOBAL};
     private Sa2ts.Context context;
 
-
-    public Sa2ts()
+    public Sa2ts(SaNode saRoot)
     {
         tableGlobale = new Ts();
         tableLocaleCourante = null;
         context = Context.GLOBAL;
     }
 
+    public Ts getTableGlobale() {
+        return tableGlobale;
+    }
+
 
     // DEC -> var id
-    public void visit(SaDecVar node)
+    public Void visit(SaDecVar node)
     {
 
         defaultIn(node);
         if(context == Context.GLOBAL) {
             if (tableGlobale.getVar(node.getNom()) == null) {
-                tableGlobale.addVar(node.getNom());
+                tableGlobale.addVar(node.getNom(), 1);
             }
             else {
                 System.err.println("attention il existe déjà une variable globale qui a pour nom " + node.getNom());
@@ -49,24 +52,24 @@ public class Sa2ts extends SaDepthFirstVisitor <Void>{
         return null;
     }
     // DEC -> var id taille
-    public void visit(SaDecTab node){
+    public Void visit(SaDecTab node){
         defaultIn(node);
         if(tableGlobale.getVar(node.getNom())== null){
             tableGlobale.addVar(node.getNom(), node.getTaille());
         }
         else {
-            System.error.println("attention le tableau " + node.getNom() + "est déjà définie");
+            System.out.println("attention le tableau " + node.getNom() + "est déjà définie");
             System.exit(1);
         }
 
         context = Context.PARAM;
-        if(node.getTaille() != null) node.getTaille().accept(this);
+        if(node.getTaille() != 0) node.accept(this);
 
         defaultOut(node);
-        //return null;
+        return null;
     }
     // DEC -> tableau id taille
-    public void visit(SaDecFonc node)
+    public Void visit(SaDecFonc node)
     {
         defaultIn(node);
         if(tableGlobale.getFct(node.getNom()) == null){
@@ -87,16 +90,16 @@ public class Sa2ts extends SaDepthFirstVisitor <Void>{
         node.getCorps().accept(this);
         context = Context.GLOBAL;
         defaultOut(node);
-        //return null;
+        return null;
     }
 
     // VAR -> var id
-    public void visit(SaVarSimple node)
+    public Void visit(SaVarSimple node)
     {
         defaultIn(node);
         if(tableGlobale.getVar(node.getNom()) == null){
             tableLocaleCourante = new Ts();
-            tableLocaleCourante.addVar(node.getNom());
+            tableLocaleCourante.addVar(node.getNom(), 1);
         }
         else {
             System.out.println("attention la variable simple " + node.getNom() + "est déjà définie");
@@ -105,16 +108,16 @@ public class Sa2ts extends SaDepthFirstVisitor <Void>{
         }
 
         defaultOut(node);
-        //return null;
+        return null;
     }
 
     // VAR -> Indice
-    public void visit(SaVarIndicee node)
+    public Void visit(SaVarIndicee node)
     {
         defaultIn(node);
         if(tableGlobale.getVar(node.getNom()) == null){
             tableLocaleCourante = new Ts();
-            tableLocaleCourante.addVar(node.getNom());
+            tableLocaleCourante.addVar(node.getNom(), 1);
         }
         else {
             System.out.println("attention l'indice de variable " + node.getNom() + "est déjà définie");
@@ -125,18 +128,24 @@ public class Sa2ts extends SaDepthFirstVisitor <Void>{
         if(node.getIndice() != null) node.getIndice().accept(this);
 
         defaultOut(node);
-        //return null;
+        return null;
     }
 
-    public void visit(SaAppel node)
+    public Void visit(SaAppel node)
     {
         defaultIn(node);
+        if(tableGlobale.getVar(node.getNom()) == null){
+            tableLocaleCourante = new Ts();
+            tableLocaleCourante.addVar(node.getNom(), 1);
+        }
+        else {
+            System.out.println("attention la node " + node.getNom() + "est déjà définie");
+            System.exit(1);
+        }
 
         if(node.getArguments() != null) node.getArguments().accept(this);
         defaultOut(node);
-        //return null;
+        return null;
     }
-
-
 
 }
