@@ -2,6 +2,7 @@ package ts;
 import java.io.*;
 import java.util.*;
 import sa.*;
+import ts.*;
 
 public class Ts
 {
@@ -44,6 +45,19 @@ public class Ts
 	return item;
     }
 
+	// public void addItem(String var1, TsItem var2) {
+    //     var2.portee = this;
+    //     this.hash.put(var1, var2);
+    //     if (var2 instanceof TsItemVar) {
+    //         var2.adresse = this.adrVarCourante;
+    //         this.adrVarCourante += var2.getTaille();
+    //     } else if (var2 instanceof TsItemParam) {
+    //         var2.adresse = this.adrArgCourant;
+    //         this.adrArgCourant += var2.getTaille();
+    //     }
+
+	// }
+	
     public TsItemFct addFct(String identif, int nbArgs, Ts table, SaDecFonc saDecFonc)
     {
 	TsItemFct item = new TsItemFct(identif, nbArgs, table, saDecFonc);
