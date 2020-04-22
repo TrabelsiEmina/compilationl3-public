@@ -1,0 +1,107 @@
+Package sc;
+
+Helpers/*-----------------------------------------------------------*/
+
+lettre = [['a' .. 'z'] + ['A' .. 'Z']];
+nb = ['0' .. '9']+;
+
+Tokens/*-----------------------------------------------------------*/
+
+espaces = (' ' | 13 | 10)+;
+commentaire= '#' [[0 .. 0xffff] - [10 + 13]]* (10 | 13 | 10 13);
+nombre = nb;
+entier = 'entier';
+
+plus = '+';
+moins = '-';
+mult = '*';
+div = '/';
+inf = '<';
+sup = '>';
+egal = '=';
+ou = '|';
+et = '&';
+non = '!';
+po = '(';
+pf = ')';
+si = 'si';
+alors = 'alors';
+sinon  = 'sinon';
+tq = 'tantque';
+fr = 'faire';
+ret = 'return';
+virg =',';
+pvirg =';';
+crocho = '[';
+crochf = ']';
+acco = '{';
+accf = '}';
+ecrire = 'ecrire';
+lire = 'lire';
+id = lettre (lettre | nb)*;
+
+Ignored Tokens/*-------------------------------------------------------*/
+
+espaces, commentaire;
+/*espaces, commentaire, EOF;*/
+
+Productions/*=========================================================*/
+/*programme -------------------------------------------------*/
+p = ldvo ldf;
+
+/*variables-------------------------------------------------*/
+
+ldvo = {ldv} ldv pvirg | {rien} ;
+
+ldv = {dv} dv ldvb |{rien} ;
+ldvb = {ldvb} virg dv ldvb |{rien}  ;
+
+ldf = {ldf} df ldf |{rien} ;
+
+df = id po ldv pf ldvo ibloc;
+
+/*instruction--------------------------------------------------------*/
+ibloc = acco li accf ;
+
+li = {li} i li |{rien} ;
+
+
+
+
+/*instruction = affectation ou if.. si ou tant que ou
+                 appel de fonction ou bloc instruction ou return*/
+i = {iaff} iaff pvirg | {isi} isi | {itq} itq | {iapp} iapp | {ibloc} ibloc | {iret} iret | {ecrire} iecr;
+
+iaff = var egal e pvirg;
+isi = {si} si e alors ibloc | {sinon} si e alors [ibloc1]: ibloc sinon [ibloc2]: ibloc;
+itq =  tq e fr ibloc;
+iapp = app pvirg;
+iret = ret e pvirg;
+
+iecr = ecrire po e pf pvirg;
+/*
+ilir = lire po pf;
+*/
+
+/*variable-----------------------------------------------------------------*/
+/*declarationde de variable: entier x ou  entier[5]*/
+dv = {int} entier id | {tab} entier id crocho nombre crochf;
+
+/*nom de variable et tableau indicé*/
+var = {var} id | {tabexp} id crocho e crochf;
+
+/*expression-----------------------------------------------------------------*/
+  e = {or   } e   ou   se1 | {e  } se1;
+se1 = {and  } se1 et   se2 | {e  } se2;
+se2 = {egal } se2 egal se3 | {inf} se2 inf   se3 | {e} se3;
+se3 = {add  } se3 plus se4 | {sub} se3 moins se4 | {e} se4;
+se4 = {mult } se4 mult se5 | {div} se4 div   se5 | {e} se5;
+se5 = {not  } non se5       | {e  } se6;
+se6 = {poepf} po  e    pf  | {nb } nombre | {app} app | {var} var | {ilire} lire po pf ;
+
+
+le =  {e} e suitele |{rien} ;
+suitele = {restele} virg e suitele |{rien} ;
+
+/*appel de fonction-------------------------------------------------*/
+app = id po le pf;
